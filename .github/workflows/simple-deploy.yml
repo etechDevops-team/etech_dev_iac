@@ -1,0 +1,63 @@
+name: Simple Terraform Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+
+    steps:
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.7.5
+
+    - name: Create workspace
+      run: mkdir -p terraform-workspace
+
+    - name: Create Terraform file
+      working-directory: terraform-workspace
+      run: |
+        cat > main.tf << 'EOF'
+        terraform {
+          required_providers {
+            aws = {
+              source = "hashicorp/aws"
+              version = "~> 5.0"
+            }
+          }
+        }
+
+        provider "aws" {
+          region = "us-east-1"
+        }
+
+        data "aws_iam_role" "role" {
+          name = "WordpressRole"
+        }
+
+        resource "aws_iam_instance_profile" "profile" {
+          name = "wordpress-profile-unique"
+          role = data.aws_iam_role.role.name
+        }
+        EOF
+
+    - name: Terraform Init
+      working-directory: terraform-workspace
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: terraform-workspace
+      run: terraform plan
+
+    - name: Terraform Apply
+      working-directory: terraform-workspace
+      run: terraform apply -auto-approve
