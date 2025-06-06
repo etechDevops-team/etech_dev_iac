@@ -27,7 +27,7 @@ jobs:
       run: terraform init
 
     - name: Terraform Plan
-      run: terraform plan -var-file=terraform.tfvars -target=aws_security_group.SGWordpress -target=aws_iam_instance_profile.WordpressInstanceProfile
+      run: terraform plan -target=aws_security_group.SGWordpress -target=aws_iam_instance_profile.WordpressInstanceProfile
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve -var-file=terraform.tfvars -target=aws_security_group.SGWordpress -target=aws_iam_instance_profile.WordpressInstanceProfile
+      run: terraform apply -auto-approve -target=aws_security_group.SGWordpress -target=aws_iam_instance_profile.WordpressInstanceProfile

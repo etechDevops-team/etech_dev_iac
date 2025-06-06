@@ -155,7 +155,6 @@ resource "aws_route_table_association" "RTAssociationPubC" {
 
 resource "aws_security_group" "SGWordpress" {
   name        = "SGWordpress"
-  vpc_id      = aws_vpc.VPC.id
   description = "Control access to Wordpress Instance(s)"
 
   ingress {
@@ -180,7 +179,6 @@ resource "aws_security_group" "SGWordpress" {
 
 resource "aws_security_group" "SGDatabase" {
   name        = "SGDatabase"
-  vpc_id      = aws_vpc.VPC.id
   description = "Control access to Database"
 
   ingress {
@@ -205,7 +203,6 @@ resource "aws_security_group" "SGDatabase" {
 
 resource "aws_security_group" "SGLoadBalancer" {
   name        = "SGLoadBalancer"
-  vpc_id      = aws_vpc.VPC.id
   description = "Control access to Load Balancer"
 
   ingress {
@@ -230,7 +227,6 @@ resource "aws_security_group" "SGLoadBalancer" {
 
 resource "aws_security_group" "SGEFS" {
   name        = "SGEFS"
-  vpc_id      = aws_vpc.VPC.id
   description = "Control access to EFS"
 
   ingress {
@@ -301,7 +297,6 @@ resource "aws_ssm_parameter" "CWAgentConfig" {
 
 resource "aws_security_group" "SSMAccess" {
   name        = "SSMAccess"
-  vpc_id      = aws_vpc.VPC.id
   description = "Allow SSM access"
 
   ingress {
