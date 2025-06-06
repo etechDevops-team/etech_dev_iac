@@ -23,10 +23,14 @@ jobs:
       with:
         terraform_version: 1.7.5
 
+    - name: Remove main.tf
+      run: rm -f main.tf
+
+    - name: Verify minimal.tf content
+      run: cat minimal.tf
+
     - name: Terraform Init
-      run: |
-        rm -f main.tf
-        terraform init
+      run: terraform init
 
     - name: Terraform Plan
       run: terraform plan
