@@ -21,6 +21,7 @@
                 "ec2:DescribeInternetGateways",
                 "ec2:DescribeRouteTables",
                 "ec2:DescribeSecurityGroups",
+                "ec2:ModifyVpcAttribute",
                 "iam:CreateRole",
                 "iam:AttachRolePolicy",
                 "iam:CreateInstanceProfile",
@@ -28,8 +29,11 @@
                 "iam:PassRole",
                 "iam:GetRole",
                 "iam:GetInstanceProfile",
+                "iam:ListRoles",
+                "iam:DeleteRole",
                 "ssm:PutParameter",
-                "ssm:GetParameter"
+                "ssm:GetParameter",
+                "ssm:DescribeParameters"
             ],
             "Resource": "*"
         }

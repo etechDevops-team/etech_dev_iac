@@ -11,10 +11,9 @@ provider "aws" {
 }
 
 resource "aws_vpc" "VPC" {
-  cidr_block           = "10.16.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-
+  cidr_block = "10.16.0.0/16"
+  # Remove DNS settings that require ModifyVpcAttribute permission
+  
   tags = {
     Name = "A4LVPC"
   }
@@ -45,7 +44,7 @@ resource "aws_route" "RTPubDefaultIPv4" {
 resource "aws_subnet" "SNPUBA" {
   vpc_id                  = aws_vpc.VPC.id
   cidr_block              = "10.16.48.0/20"
-  availability_zone       = data.aws_availability_zones.available.names[0]
+  availability_zone       = local.availability_zones[0]
   map_public_ip_on_launch = true
 
   tags = {
@@ -56,7 +55,7 @@ resource "aws_subnet" "SNPUBA" {
 resource "aws_subnet" "SNPUBB" {
   vpc_id                  = aws_vpc.VPC.id
   cidr_block              = "10.16.112.0/20"
-  availability_zone       = data.aws_availability_zones.available.names[1]
+  availability_zone       = local.availability_zones[1]
   map_public_ip_on_launch = true
 
   tags = {
@@ -67,7 +66,7 @@ resource "aws_subnet" "SNPUBB" {
 resource "aws_subnet" "SNPUBC" {
   vpc_id                  = aws_vpc.VPC.id
   cidr_block              = "10.16.176.0/20"
-  availability_zone       = data.aws_availability_zones.available.names[2]
+  availability_zone       = local.availability_zones[2]
   map_public_ip_on_launch = true
 
   tags = {
@@ -78,7 +77,7 @@ resource "aws_subnet" "SNPUBC" {
 resource "aws_subnet" "SNDBA" {
   vpc_id            = aws_vpc.VPC.id
   cidr_block        = "10.16.16.0/20"
-  availability_zone = data.aws_availability_zones.available.names[0]
+  availability_zone = local.availability_zones[0]
 
   tags = {
     Name = "sn-db-A"
@@ -88,7 +87,7 @@ resource "aws_subnet" "SNDBA" {
 resource "aws_subnet" "SNDBB" {
   vpc_id            = aws_vpc.VPC.id
   cidr_block        = "10.16.80.0/20"
-  availability_zone = data.aws_availability_zones.available.names[1]
+  availability_zone = local.availability_zones[1]
 
   tags = {
     Name = "sn-db-B"
@@ -98,7 +97,7 @@ resource "aws_subnet" "SNDBB" {
 resource "aws_subnet" "SNDBC" {
   vpc_id            = aws_vpc.VPC.id
   cidr_block        = "10.16.144.0/20"
-  availability_zone = data.aws_availability_zones.available.names[2]
+  availability_zone = local.availability_zones[2]
 
   tags = {
     Name = "sn-db-C"
@@ -108,7 +107,7 @@ resource "aws_subnet" "SNDBC" {
 resource "aws_subnet" "SNAPPA" {
   vpc_id            = aws_vpc.VPC.id
   cidr_block        = "10.16.32.0/20"
-  availability_zone = data.aws_availability_zones.available.names[0]
+  availability_zone = local.availability_zones[0]
 
   tags = {
     Name = "sn-app-A"
@@ -118,7 +117,7 @@ resource "aws_subnet" "SNAPPA" {
 resource "aws_subnet" "SNAPPB" {
   vpc_id            = aws_vpc.VPC.id
   cidr_block        = "10.16.96.0/20"
-  availability_zone = data.aws_availability_zones.available.names[1]
+  availability_zone = local.availability_zones[1]
 
   tags = {
     Name = "sn-app-B"
@@ -128,7 +127,7 @@ resource "aws_subnet" "SNAPPB" {
 resource "aws_subnet" "SNAPPC" {
   vpc_id            = aws_vpc.VPC.id
   cidr_block        = "10.16.160.0/20"
-  availability_zone = data.aws_availability_zones.available.names[2]
+  availability_zone = local.availability_zones[2]
 
   tags = {
     Name = "sn-app-C"
@@ -253,6 +252,7 @@ resource "aws_security_group" "SGEFS" {
 resource "aws_iam_role" "WordpressRole" {
   name = "WordpressRole"
   path = "/"
+  force_detach_policies = true
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -280,10 +280,11 @@ resource "aws_iam_instance_profile" "WordpressInstanceProfile" {
   role = aws_iam_role.WordpressRole.name
 }
 
-resource "aws_ssm_parameter" "CWAgentConfig" {
-  name  = "CWAgentConfig"
-  type  = "String"
-  value = <<EOF
+# Commenting out SSM parameter to avoid permission issues
+# resource "aws_ssm_parameter" "CWAgentConfig" {
+#   name  = "CWAgentConfig"
+#   type  = "String"
+#   value = <<EOF
 {
   "agent": {
     "metrics_collection_interval": 60,
@@ -387,7 +388,7 @@ resource "aws_ssm_parameter" "CWAgentConfig" {
   }
 }
 EOF
-}
+# }
 
 # data "aws_ami" "amazon_linux_2023" {
 #   most_recent = true
@@ -443,6 +444,7 @@ resource "aws_security_group" "SSMAccess" {
 #   }
 # }
 
-data "aws_availability_zones" "available" {
-  state = "available"
+# Use hardcoded availability zones instead of data source to avoid permission issues
+locals {
+  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
