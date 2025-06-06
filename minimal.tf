@@ -15,8 +15,8 @@ data "aws_iam_role" "existing_role" {
   name = "WordpressRole"
 }
 
-# Create only the instance profile
-resource "aws_iam_instance_profile" "profile" {
-  name = "WordpressProfile"
+# Create only the instance profile with a unique name
+resource "aws_iam_instance_profile" "wordpress_profile" {
+  name = "wordpress-profile-new"
   role = data.aws_iam_role.existing_role.name
 }
