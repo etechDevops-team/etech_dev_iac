@@ -10,6 +10,11 @@ provider "aws" {
   region = "us-east-1" # Adjust as needed
 }
 
+# Use hardcoded availability zones instead of data source to avoid permission issues
+locals {
+  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+}
+
 resource "aws_vpc" "VPC" {
   cidr_block = "10.16.0.0/16"
   # Remove DNS settings that require ModifyVpcAttribute permission
@@ -280,125 +285,13 @@ resource "aws_iam_instance_profile" "WordpressInstanceProfile" {
   role = aws_iam_role.WordpressRole.name
 }
 
-# Commenting out SSM parameter to avoid permission issues
-# resource "aws_ssm_parameter" "CWAgentConfig" {
-#   name  = "CWAgentConfig"
-#   type  = "String"
-#   value = <<EOF
-{
-  "agent": {
-    "metrics_collection_interval": 60,
-    "run_as_user": "root"
-  },
-  "logs": {
-    "logs_collected": {
-      "files": {
-        "collect_list": [
-          {
-            "file_path": "/var/log/secure",
-            "log_group_name": "/var/log/secure",
-            "log_stream_name": "{instance_id}"
-          },
-          {
-            "file_path": "/var/log/httpd/access_log",
-            "log_group_name": "/var/log/httpd/access_log",
-            "log_stream_name": "{instance_id}"
-          },
-          {
-            "file_path": "/var/log/httpd/error_log",
-            "log_group_name": "/var/log/httpd/error_log",
-            "log_stream_name": "{instance_id}"
-          }
-        ]
-      }
-    }
-  },
-  "metrics": {
-    "append_dimensions": {
-      "AutoScalingGroupName": "$${aws:AutoScalingGroupName}",
-      "ImageId": "$${aws:ImageId}",
-      "InstanceId": "$${aws:InstanceId}",
-      "InstanceType": "$${aws:InstanceType}"
-    },
-    "metrics_collected": {
-      "collectd": {
-        "metrics_aggregation_interval": 60
-      },
-      "cpu": {
-        "measurement": [
-          "cpu_usage_idle",
-          "cpu_usage_iowait",
-          "cpu_usage_user",
-          "cpu_usage_system"
-        ],
-        "metrics_collection_interval": 60,
-        "resources": [
-          "*"
-        ],
-        "totalcpu": false
-      },
-      "disk": {
-        "measurement": [
-          "used_percent",
-          "inodes_free"
-        ],
-        "metrics_collection_interval": 60,
-        "resources": [
-          "*"
-        ]
-      },
-      "diskio": {
-        "measurement": [
-          "io_time",
-          "write_bytes",
-          "read_bytes",
-          "writes",
-          "reads"
-        ],
-        "metrics_collection_interval": 60,
-        "resources": [
-          "*"
-        ]
-      },
-      "mem": {
-        "measurement": [
-          "mem_used_percent"
-        ],
-        "metrics_collection_interval": 60
-      },
-      "netstat": {
-        "measurement": [
-          "tcp_established",
-          "tcp_time_wait"
-        ],
-        "metrics_collection_interval": 60
-      },
-      "statsd": {
-        "metrics_aggregation_interval": 60,
-        "metrics_collection_interval": 10,
-        "service_address": ":8125"
-      },
-      "swap": {
-        "measurement": [
-          "swap_used_percent"
-        ],
-        "metrics_collection_interval": 60
-      }
-    }
-  }
+/* Commenting out SSM parameter to avoid permission issues
+resource "aws_ssm_parameter" "CWAgentConfig" {
+  name  = "CWAgentConfig"
+  type  = "String"
+  value = "Simplified config to avoid permission issues"
 }
-EOF
-# }
-
-# data "aws_ami" "amazon_linux_2023" {
-#   most_recent = true
-#   owners      = ["amazon"]
-
-#   filter {
-#     name   = "name"
-#     values = ["al2023-ami-*-x86_64"]
-#   }
-# }
+*/
 
 resource "aws_security_group" "SSMAccess" {
   name        = "SSMAccess"
@@ -425,26 +318,16 @@ resource "aws_security_group" "SSMAccess" {
   }
 }
 
-# resource "aws_instance" "WordpressEC2" {
-#   ami                    = data.aws_ami.amazon_linux_2023.id
-#   instance_type          = "t2.micro"
-#   subnet_id              = aws_subnet.SNPUBA.id
-#   iam_instance_profile   = aws_iam_instance_profile.WordpressInstanceProfile.name
-#   vpc_security_group_ids = [aws_security_group.SGWordpress.id, aws_security_group.SSMAccess.id]
+/* Commenting out EC2 instance to avoid permission issues
+resource "aws_instance" "WordpressEC2" {
+  ami                    = "ami-0230bd60aa48260c6" # Amazon Linux 2023 AMI
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.SNPUBA.id
+  iam_instance_profile   = aws_iam_instance_profile.WordpressInstanceProfile.name
+  vpc_security_group_ids = [aws_security_group.SGWordpress.id, aws_security_group.SSMAccess.id]
 
-#   user_data = <<-EOF
-#               #!/bin/bash
-#               yum update -y
-#               systemctl start amazon-ssm-agent
-#               systemctl enable amazon-ssm-agent
-#               EOF
-
-#   tags = {
-#     Name = "WordpressEC2"
-#   }
-# }
-
-# Use hardcoded availability zones instead of data source to avoid permission issues
-locals {
-  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  tags = {
+    Name = "WordpressEC2"
+  }
 }
+*/
