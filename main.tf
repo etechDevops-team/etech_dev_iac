@@ -17,7 +17,6 @@ locals {
 
 resource "aws_vpc" "VPC" {
   cidr_block = "10.16.0.0/16"
-  # Remove DNS settings that require ModifyVpcAttribute permission
   
   tags = {
     Name = "A4LVPC"
@@ -254,6 +253,7 @@ resource "aws_security_group" "SGEFS" {
   }
 }
 
+/* Commenting out IAM role to avoid conflict with existing role
 resource "aws_iam_role" "WordpressRole" {
   name = "WordpressRole"
   path = "/"
@@ -278,11 +278,17 @@ resource "aws_iam_role" "WordpressRole" {
     "arn:aws:iam::aws:policy/AmazonElasticFileSystemClientFullAccess"
   ]
 }
+*/
+
+# Use existing IAM role instead of creating a new one
+data "aws_iam_role" "existing_wordpress_role" {
+  name = "WordpressRole"
+}
 
 resource "aws_iam_instance_profile" "WordpressInstanceProfile" {
   name = "WordpressInstanceProfile"
   path = "/"
-  role = aws_iam_role.WordpressRole.name
+  role = data.aws_iam_role.existing_wordpress_role.name
 }
 
 /* Commenting out SSM parameter to avoid permission issues
